@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pet Marketplace</title>
+</head>
+<body>
+    <h1>🐶 Pet Selling App</h1>
+
+    <h3>Verify Seller</h3>
+    <form id="verifyForm">
+        <input type="text" name="aadhar" placeholder="Enter Aadhar Number"><br>
+        <input type="text" name="pan" placeholder="Enter PAN Number"><br>
+        <button type="submit">Verify</button>
+    </form>
+    <p id="verifyResult"></p>
+
+    <h3>Filter Pets</h3>
+    <form id="filterForm">
+        <input type="text" name="breed" placeholder="Breed">
+        <input type="number" name="price" placeholder="Max Price">
+        <input type="text" name="location" placeholder="Location">
+        <input type="text" name="language" placeholder="Language">
+        <button type="submit">Apply Filter</button>
+    </form>
+
+    <ul id="petList">
+        {% for pet in pets %}
+        <li>{{ pet.name }} - {{ pet.breed }} - ₹{{ pet.price }} - {{ pet.location }} - {{ pet.language }}</li>
+        {% endfor %}
+    </ul>
+
+    <script>
+        const verifyForm = document.getElementById("verifyForm");
+        const verifyResult = document.getElementById("verifyResult");
+        verifyForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const formData = new FormData(verifyForm);
+            const res = await fetch("/verify", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+            const data = await res.json();
+            verifyResult.textContent = data.message;
+        });
+
+        const filterForm = document.getElementById("filterForm");
+        const petList = document.getElementById("petList");
+        filterForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const params = new URLSearchParams(new FormData(filterForm)).toString();
+            const res = await fetch("/filter?" + params);
+            const data = await res.json();
+            petList.innerHTML = data.map(p => 
+                `<li>${p.name} - ${p.breed} - ₹${p.price} - ${p.location} - ${p.language}</li>`
+            ).join("");
+        });
+    </script>
+</body>
+</html>
